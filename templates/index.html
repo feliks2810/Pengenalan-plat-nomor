@@ -1,0 +1,93 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>PINHEL - Sistem Deteksi Pelanggaran Helm</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1 { color: #333; }
+                .container { display: flex; flex-direction: column; align-items: center; }
+                .video-container { margin-bottom: 20px; }
+                .violations { width: 80%; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #f2f2f2; }
+                .refresh { margin-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>PINHEL - Sistem Deteksi Pelanggaran Helm</h1>
+                <div class="video-container">
+                    <h2>Live Feed</h2>
+                    <img src="/video_feed" width="640" height="480" />
+                </div>
+                <div class="violations">
+                    <h2>Pelanggaran Terbaru</h2>
+                    <button class="refresh" onclick="getViolations()">Refresh</button>
+                    <table id="violations-table">
+                        <thead>
+                            <tr>
+                                <th>Waktu</th>
+                                <th>Plat Nomor</th>
+                                <th>Jenis Pelanggaran</th>
+                                <th>Gambar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="violations-body">
+                            <!-- Data akan diisi secara dinamis -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <script>
+                // Fungsi untuk mendapatkan data pelanggaran terbaru
+                function getViolations() {
+                    fetch('/api/violations')
+                        .then(response => response.json())
+                        .then(data => {
+                            const tableBody = document.getElementById('violations-body');
+                            tableBody.innerHTML = '';
+                            
+                            data.violations.forEach(violation => {
+                                const row = document.createElement('tr');
+                                
+                                const timeCell = document.createElement('td');
+                                const date = new Date(violation.timestamp);
+                                timeCell.textContent = date.toLocaleString();
+                                row.appendChild(timeCell);
+                                
+                                const plateCell = document.createElement('td');
+                                plateCell.textContent = violation.plateNumber || 'Belum Teridentifikasi';
+                                row.appendChild(plateCell);
+                                
+                                const violationCell = document.createElement('td');
+                                violationCell.textContent = violation.violationType;
+                                row.appendChild(violationCell);
+                                
+                                const imageCell = document.createElement('td');
+                                if (violation.imageFile) {
+                                    const img = document.createElement('img');
+                                    img.src = `/api/images/${violation.imageFile}`;
+                                    img.width = 100;
+                                    imageCell.appendChild(img);
+                                } else {
+                                    imageCell.textContent = 'Tidak ada gambar';
+                                }
+                                row.appendChild(imageCell);
+                                
+                                tableBody.appendChild(row);
+                            });
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+                
+                // Panggil fungsi saat halaman dimuat
+                document.addEventListener('DOMContentLoaded', getViolations);
+                
+                // Refresh setiap 10 detik
+                setInterval(getViolations, 10000);
+            </script>
+        </body>
+        </html>
+        
