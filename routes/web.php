@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PelanggaranController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Api\ViolationController;
+
 
 Route::get('/', [AuthController::class, 'login'])->name('login');
 
@@ -19,9 +21,8 @@ Route::post('/register', [AuthController::class, 'handleRegister']);
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
     Route::get('/pemantauan', fn () => view('pemantauan'));
-    Route::get('/pelanggaran', [PelanggaranController::class, 'show'])->name('pelanggaran.show');  // Mengarahkan ke method show()
-    Route::get('/pelanggaran/deteksi-real-time', [PelanggaranController::class, 'deteksiPelanggaranRealTime'])->name('pelanggaran.deteksiRealTime');
-    Route::get('/statistik', fn () => view('statistik'));
+    Route::get('/pelanggaran', [PelanggaranController::class, 'show'])->name('pelanggaran');
+    Route::get('/statistik', [ViolationController::class, 'showStats'])->name('statistik');
 });
 
 // Rute logout

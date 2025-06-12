@@ -1,150 +1,346 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Halaman Pelanggaran Lalu Lintas</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Pelanggaran</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-  <style>
-    .popup-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 50;
-      align-items: center;
-      justify-content: center;
-    }
-    .popup-overlay.active {
-      display: flex;
-    }
-  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gray-100">
-  <div class="bg-white p-6 rounded-xl shadow-lg w-[95%] max-w-md sm:max-w-lg mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-xl font-bold text-gray-800">Data Pelanggaran</h1>
-      <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700 transition" title="Kembali ke Dashboard">
-        <button id="close-button" class="text-2xl font-bold text-gray-600 hover:text-red-600 transition-colors">
-          ×
-        </button>
-      </a>
-    </div>
+<body class="bg-[#9ccba7] min-h-screen flex items-start justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Date Filter Button -->
+    <button 
+      id="date-filter" 
+      class="mb-4 bg-[#4dbd87] text-[#0f3f2f] font-sans text-sm font-semibold py-2 px-6 rounded shadow-sm hover:bg-[#3da872] transition-colors"
+      type="button"
+      onclick="toggleDateFilter()"
+    >
+      <span id="current-date">HH/BB/TTTT</span>
+      <i class="fas fa-calendar-alt ml-2"></i>
+    </button>
 
-    <div class="flex justify-center mb-6">
-      <div class="flex items-center bg-blue-50 p-2 rounded-lg border border-blue-200">
-        <select class="bg-white border border-gray-300 rounded p-2 w-16 text-center text-gray-700">
-          <option value="" disabled selected>HH</option>
-          @for ($i = 1; $i <= 31; $i++)
-            <option>{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-          @endfor
+    <!-- Date Filter Dropdown (Hidden by default) -->
+    <div id="date-filter-dropdown" class="mb-4 bg-white rounded shadow-lg border border-[#7a9a7f] p-4 hidden">
+      <h4 class="text-sm font-semibold text-[#0f3f2f] mb-3">Filter Tanggal:</h4>
+      <div class="flex gap-2 mb-3">
+        <select id="filter-day" class="flex-1 text-xs border border-[#7a9a7f] rounded py-1 px-2">
+          <option value="">DD</option>
         </select>
-        <div class="text-gray-400 mx-1">/</div>
-        <select class="bg-white border border-gray-300 rounded p-2 w-16 text-center text-gray-700">
-          <option value="" disabled selected>BB</option>
-          @for ($i = 1; $i <= 12; $i++)
-            <option>{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-          @endfor
+        <span class="text-[#0f3f2f] self-center">/</span>
+        <select id="filter-month" class="flex-1 text-xs border border-[#7a9a7f] rounded py-1 px-2">
+          <option value="">MM</option>
         </select>
-        <div class="text-gray-400 mx-1">/</div>
-        <select class="bg-white border border-gray-300 rounded p-2 w-20 text-center text-gray-700">
-          <option value="" disabled selected>TTTT</option>
-          @for ($year = 2023; $year <= 2026; $year++)
-            <option>{{ $year }}</option>
-          @endfor
+        <span class="text-[#0f3f2f] self-center">/</span>
+        <select id="filter-year" class="flex-1 text-xs border border-[#7a9a7f] rounded py-1 px-2">
+          <option value="">YYYY</option>
         </select>
-        <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg ml-2">
-          <i class="fas fa-search"></i>
+      </div>
+      <div class="flex gap-2">
+        <button 
+          onclick="applyDateFilter()" 
+          class="flex-1 bg-[#4dbd87] text-[#0f3f2f] text-xs py-1 px-3 rounded hover:bg-[#3da872]"
+        >
+          Terapkan
+        </button>
+        <button 
+          onclick="clearDateFilter()" 
+          class="flex-1 bg-gray-300 text-gray-700 text-xs py-1 px-3 rounded hover:bg-gray-400"
+        >
+          Reset
         </button>
       </div>
     </div>
 
-    <div class="space-y-4">
-      @php
-        $pelanggarans = [
-          ['plate' => 'T 3253 SZ', 'date' => '06/07/2024', 'time' => '13:25 WIB'],
-          ['plate' => 'KH 3258 YF', 'date' => '05/07/2024', 'time' => '09:45 WIB'],
-          ['plate' => 'KT 3488 QF', 'date' => '04/07/2024', 'time' => '16:10 WIB'],
-          ['plate' => 'Z 4618 WA', 'date' => '03/07/2024', 'time' => '11:30 WIB'],
-        ];
-      @endphp
-
-      @foreach ($pelanggarans as $data)
-        <div class="flex items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
-          <div class="relative w-16 h-16 rounded-lg mr-4 overflow-hidden">
-            <img alt="Pengendara motor" class="object-cover w-full h-full" src="{{ asset('images/sample_motor.jpg') }}" />
-            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-40 text-white text-xs p-1 text-center">Motor</div>
-          </div>
-          <div class="flex-1">
-            <input class="bg-white border border-gray-300 rounded-lg p-2 w-full text-center font-medium" readonly type="text" value="{{ $data['plate'] }}" />
-          </div>
-          <button class="text-blue-600 hover:text-blue-800 ml-3 transition info-btn"
-            data-plate="{{ $data['plate'] }}"
-            data-date="{{ $data['date'] }}"
-            data-time="{{ $data['time'] }}">
-            <i class="fas fa-external-link-alt"></i>
-          </button>
-        </div>
-      @endforeach
+    <!-- Loading Indicator -->
+    <div id="loading" class="text-center py-4 hidden">
+      <i class="fas fa-spinner fa-spin text-[#0f3f2f] text-xl"></i>
+      <p class="text-[#0f3f2f] text-sm mt-2">Memuat data...</p>
     </div>
 
-    <div class="mt-6 text-center">
-      <button class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition shadow-md">
-        Lihat Semua Pelanggaran
-      </button>
+    <!-- Violations List -->
+    <div id="violations-list" class="space-y-3">
+      <!-- Data akan diisi oleh JavaScript -->
     </div>
+
+    <!-- No Data Message -->
+    <div id="no-data" class="text-center py-8 hidden">
+      <i class="fas fa-clipboard-list text-[#0f3f2f] text-4xl mb-3"></i>
+      <p class="text-[#0f3f2f] text-sm">Tidak ada pelanggaran ditemukan</p>
+    </div>
+
+    <!-- Load More Button -->
+    <button 
+      id="load-more" 
+      class="w-full mt-4 bg-[#4dbd87] text-[#0f3f2f] font-sans text-sm font-semibold py-2 px-6 rounded shadow-sm hover:bg-[#3da872] transition-colors hidden"
+      onclick="loadMoreViolations()"
+    >
+      Muat Lebih Banyak
+    </button>
+
+    <!-- Back Button -->
+    <button 
+      onclick="goBack()" 
+      class="w-full mt-4 bg-gray-300 text-gray-700 font-sans text-sm font-semibold py-2 px-6 rounded shadow-sm hover:bg-gray-400 transition-colors"
+    >
+      <i class="fas fa-arrow-left mr-2"></i>Kembali
+    </button>
   </div>
 
-  <div class="popup-overlay" id="popupOverlay">
-    <div class="bg-white p-4 rounded-lg shadow-lg max-w-md">
-      <div class="flex justify-end">
-        <button class="text-xl font-bold close-popup">×</button>
+  <!-- Modal for expanded view -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white rounded-lg max-w-lg w-full p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-[#0f3f2f]">Detail Pelanggaran</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times text-xl"></i>
+        </button>
       </div>
-      <img alt="Pengendara motor melanggar" class="w-full h-auto rounded-lg mb-4" src="{{ asset('images/sample_popup.jpg') }}" />
-      <div class="bg-blue-100 p-4 rounded-lg">
-        <p class="text-black"><strong>Plate Nomor:</strong> <span id="plateNumber">T 3253 SZ</span></p>
-        <p class="text-black"><strong>Tanggal:</strong> <span id="violationDate">06/07/2024</span></p>
-        <p class="text-black"><strong>Jam:</strong> <span id="violationTime">13:25 WIB</span></p>
+      <div id="modal-content">
+        <!-- Modal content akan diisi oleh JavaScript -->
       </div>
     </div>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const infoButtons = document.querySelectorAll('.info-btn');
-      const popupOverlay = document.getElementById('popupOverlay');
-      const closeButton = document.querySelector('.close-popup');
-      const plateElement = document.getElementById('plateNumber');
-      const dateElement = document.getElementById('violationDate');
-      const timeElement = document.getElementById('violationTime');
+    let currentPage = 0;
+    let allViolations = [];
+    let filteredViolations = [];
+    const itemsPerPage = 10;
 
-      infoButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const plate = this.getAttribute('data-plate');
-          const date = this.getAttribute('data-date');
-          const time = this.getAttribute('data-time');
+    $(document).ready(function() {
+      initializeDateSelectors();
+      loadViolations();
+      
+      // Auto refresh setiap 30 detik
+      setInterval(loadViolations, 30000);
+    });
 
-          plateElement.textContent = plate;
-          dateElement.textContent = date;
-          timeElement.textContent = time;
+    function initializeDateSelectors() {
+      // Populate day selector
+      for (let i = 1; i <= 31; i++) {
+        const day = String(i).padStart(2, '0');
+        $('#filter-day').append(`<option value="${day}">${day}</option>`);
+      }
 
-          popupOverlay.classList.add('active');
+      // Populate month selector
+      for (let i = 1; i <= 12; i++) {
+        const month = String(i).padStart(2, '0');
+        $('#filter-month').append(`<option value="${month}">${month}</option>`);
+      }
+
+      // Populate year selector
+      const currentYear = new Date().getFullYear();
+      for (let year = 2023; year <= currentYear; year++) {
+        $('#filter-year').append(`<option value="${year}">${year}</option>`);
+      }
+
+      // Set current date as default
+      const today = new Date();
+      const currentDateStr = today.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric'
+      });
+      $('#current-date').text(currentDateStr);
+    }
+
+    function loadViolations() {
+      $('#loading').show();
+      $('#violations-list').hide();
+      $('#no-data').hide();
+
+      $.get('http://localhost:5000/api/violations', function(data) {
+        allViolations = data.violations || [];
+        applyCurrentFilter();
+      }).fail(function(xhr, status, error) {
+        console.log("Gagal mengambil data pelanggaran:", error);
+        $('#loading').hide();
+        $('#no-data').show();
+        $('#no-data p').text('Error: Gagal memuat data');
+      });
+    }
+
+    function applyCurrentFilter() {
+      // Apply any active filters
+      const day = $('#filter-day').val();
+      const month = $('#filter-month').val();
+      const year = $('#filter-year').val();
+
+      if (day || month || year) {
+        filteredViolations = allViolations.filter(violation => {
+          const date = new Date(violation.timestamp);
+          const vDay = String(date.getDate()).padStart(2, '0');
+          const vMonth = String(date.getMonth() + 1).padStart(2, '0');
+          const vYear = String(date.getFullYear());
+
+          return (!day || vDay === day) &&
+                 (!month || vMonth === month) &&
+                 (!year || vYear === year);
         });
+      } else {
+        filteredViolations = [...allViolations];
+      }
+
+      currentPage = 0;
+      displayViolations();
+    }
+
+    function displayViolations() {
+      $('#loading').hide();
+      
+      if (filteredViolations.length === 0) {
+        $('#violations-list').hide();
+        $('#no-data').show();
+        $('#load-more').hide();
+        return;
+      }
+
+      const startIndex = currentPage * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const violationsToShow = filteredViolations.slice(0, endIndex);
+
+      let html = '';
+      violationsToShow.forEach((violation, index) => {
+        const date = new Date(violation.timestamp);
+        const dateStr = date.toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const timeStr = date.toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        const plateNumber = violation.plateNumber || 'Tidak Teridentifikasi';
+        const imageUrl = violation.imageFile ? 
+          `http://localhost:5000/api/images/${violation.imageFile}` : 
+          'https://placehold.co/60x40?text=No+Image';
+
+        html += `
+          <div class="flex items-center bg-[#a6c9b0] rounded border border-[#7a9a7f] p-2 violation-item" data-index="${index}">
+            <img 
+              alt="Gambar Pelanggaran" 
+              class="w-16 h-10 object-cover rounded cursor-pointer" 
+              src="${imageUrl}"
+              onerror="this.src='https://placehold.co/60x40?text=No+Image'"
+              onclick="expandImage('${imageUrl}', '${plateNumber}', '${dateStr}', '${timeStr}', '${violation.violationType || 'Pelanggaran Lalu Lintas'}')"
+            />
+            <input 
+              class="mx-4 flex-1 text-center text-xs font-mono bg-white border border-[#7a9a7f] rounded py-1" 
+              readonly 
+              type="text" 
+              value="${plateNumber}"
+            />
+            <button 
+              aria-label="Expand" 
+              class="text-[#4a6a4a] hover:text-[#2f4a2f] text-lg" 
+              type="button"
+              onclick="expandImage('${imageUrl}', '${plateNumber}', '${dateStr}', '${timeStr}', '${violation.violationType || 'Pelanggaran Lalu Lintas'}')"
+            >
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        `;
       });
 
-      closeButton.addEventListener('click', function() {
-        popupOverlay.classList.remove('active');
-      });
+      $('#violations-list').html(html).show();
+      
+      // Show/hide load more button
+      if (endIndex < filteredViolations.length) {
+        $('#load-more').show();
+      } else {
+        $('#load-more').hide();
+      }
+    }
 
-      popupOverlay.addEventListener('click', function(e) {
-        if (e.target === popupOverlay) {
-          popupOverlay.classList.remove('active');
-        }
+    function loadMoreViolations() {
+      currentPage++;
+      displayViolations();
+    }
+
+    function toggleDateFilter() {
+      $('#date-filter-dropdown').toggleClass('hidden');
+    }
+
+    function applyDateFilter() {
+      const day = $('#filter-day').val();
+      const month = $('#filter-month').val();
+      const year = $('#filter-year').val();
+
+      let dateText = '';
+      if (day || month || year) {
+        dateText = `${day || 'HH'}/${month || 'BB'}/${year || 'TTTT'}`;
+      } else {
+        const today = new Date();
+        dateText = today.toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      }
+
+      $('#current-date').text(dateText);
+      $('#date-filter-dropdown').addClass('hidden');
+      applyCurrentFilter();
+    }
+
+    function clearDateFilter() {
+      $('#filter-day').val('');
+      $('#filter-month').val('');
+      $('#filter-year').val('');
+      
+      const today = new Date();
+      const todayStr = today.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
       });
+      $('#current-date').text(todayStr);
+      
+      $('#date-filter-dropdown').addClass('hidden');
+      applyCurrentFilter();
+    }
+
+    function expandImage(imageUrl, plateNumber, date, time, violationType) {
+      const modalContent = `
+        <div class="text-center">
+          <img src="${imageUrl}" alt="Gambar Pelanggaran" class="w-full max-h-64 object-contain rounded mb-4">
+          <div class="text-left space-y-2">
+            <p><strong>Plat Nomor:</strong> <span class="font-mono bg-yellow-100 px-2 py-1 rounded">${plateNumber}</span></p>
+            <p><strong>Jenis Pelanggaran:</strong> ${violationType}</p>
+            <p><strong>Tanggal:</strong> ${date}</p>
+            <p><strong>Waktu:</strong> ${time}</p>
+          </div>
+        </div>
+      `;
+      
+      $('#modal-content').html(modalContent);
+      $('#modal').removeClass('hidden');
+    }
+
+    function closeModal() {
+      $('#modal').addClass('hidden');
+    }
+
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // Close modal when clicking outside
+    $('#modal').click(function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
     });
   </script>
 </body>
