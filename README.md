@@ -38,24 +38,28 @@ Meningkatkan keselamatan lalu lintas dengan membantu instansi atau pihak keamana
 ## 🧑‍💻 Cara Instalasi (Local Development) Clone repository
 
 1. Clone repository ini
-2. Instalasi dependensi dengan `composer install`
-3. Buat File .env
-4. Jalankan Migration
-5. Jalankan Server Laravel
-6. Jalankan Server Python (YOLO + OCR)
+   ```bash
+    git clone https://github.com/feliks2810/Pengenalan-plat-nomor.git
+    cd Pengenalan-plat-nomor
 
+3. Instalasi dependensi
+   ```bash
+   composer install
+    npm install && npm run dev
 
-📂 Struktur Folder Penting
-bash
-Copy
-Edit
-├── app/                 # Laravel app
-├── routes/              # File routing (web.php, api.php)
-├── yolo-flask-api/      # Folder Python untuk YOLO & EasyOCR
-├── public/              # Asset publik & upload hasil deteksi
-├── database/            # Migration & seeders
-├── resources/views/     # Blade templates
-
+5. Buat File .env
+   ```bash
+   cp .env.example .env
+    php artisan key:generate
+7. Jalankan Migration
+   ```bash
+   php artisan migrate
+9. Jalankan Server Laravel
+    ```bash
+    php artisan serve
+11. Jalankan Server Python (YOLO + OCR)
+    ```bash
+    python app.py
 
 
 
