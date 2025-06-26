@@ -4,22 +4,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePelanggaransTable extends Migration
+return new class extends Migration
 {
     public function up()
-{
-    Schema::create('pelanggarans', function (Blueprint $table) {
-        $table->id();
-        $table->string('plat_nomor');
-        $table->timestamp('waktu');
-        $table->string('gambar');
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('pelanggaran', function (Blueprint $table) {
+            $table->id();
+            $table->string('description')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+        });
+    }
 
-public function down()
-{
-    Schema::dropIfExists('pelanggarans');
-}
-
-}
+    public function down()
+    {
+        Schema::dropIfExists('pelanggaran');
+    }
+};

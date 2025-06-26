@@ -377,15 +377,14 @@ def capture_violation():
         
         timestamp = datetime.datetime.now().isoformat()
         violation = {
-            "id": violation_id,
-            "timestamp": timestamp,
-            "plateNumber": plate_number,
-            "plateConfidence": float(plate_conf),
-            "violationType": "Tidak menggunakan helm",
-            "helmConfidence": float(helmet_conf),
-            "imageFile": image_filename,
-            "created_at": timestamp
-        }
+    "timestamp": timestamp,
+    "plateNumber": plate_number,
+    "plateConfidence": float(plate_conf),
+    "violationType": "Tidak menggunakan helm",
+    "helmConfidence": float(helmet_conf),
+    "imageFile": image_filename,
+    "created_at": timestamp
+}
         violations.append(violation)
         return jsonify({"status": "success", "id": violation_id, "violation": violation})
     except Exception as e:

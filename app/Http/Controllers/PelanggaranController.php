@@ -3,18 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Violation;
 
 class PelanggaranController extends Controller
 {
-    public function show()
+    public function index()
     {
-        // Logika untuk menampilkan halaman pelanggaran
-        return view('pelanggaran'); // Pastikan file pelanggaran.blade.php ada
+        $pelanggaran = Violation::all();
+        return view('pelanggaran', compact('pelanggaran'));
     }
 
-    public function deteksiPelanggaranRealTime()
+    public function show($id)
     {
-        // Logika untuk deteksi real-time (opsional)
-        return view('deteksi-real-time'); // Jika ada file terpisah
+        $pelanggaran = Violation::findOrFail($id);
+        return view('pelanggaran', compact('pelanggaran'));
     }
 }

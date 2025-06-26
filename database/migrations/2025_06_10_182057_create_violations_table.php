@@ -4,17 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateViolationsTable extends Migration
+return new class extends Migration
 {
     public function up()
     {
         Schema::create('violations', function (Blueprint $table) {
-            $table->id();
-            $table->string('plate_number');
-            $table->dateTime('detection_time');
-            $table->float('confidence');
-            $table->string('image_path');
-            $table->timestamps();
+            $table->id(); // Primary key otomatis
+            $table->string('description')->nullable();
+            $table->string('plateNumber')->nullable();
+            $table->float('plateConfidence')->nullable();
+            $table->string('violationType')->nullable();
+            $table->float('helmConfidence')->nullable();
+            $table->string('imageFile')->nullable();
+            $table->string('image_path')->nullable();
+            $table->timestamp('timestamp');
+            $table->timestamps(); // created_at dan updated_at
         });
     }
 
@@ -22,4 +26,4 @@ class CreateViolationsTable extends Migration
     {
         Schema::dropIfExists('violations');
     }
-}
+};

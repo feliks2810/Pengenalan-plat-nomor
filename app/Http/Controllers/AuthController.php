@@ -4,41 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function login() {
-        return view('login');
+    public function showLoginForm()
+    {
+        return view('auth.login');
     }
 
-    public function handleLogin(Request $request) {
-        $credentials = $request->only('username', 'password');
-
+    public function handleLogin(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
             return redirect()->intended('/dashboard');
         }
-
-        return back()->withErrors(['loginError' => 'Username atau password salah.']);
+        return back()->withErrors(['email' => 'Login gagal, periksa email dan password.']);
     }
 
-    public function register() {
-        return view('register');
+    public function showRegisterForm()
+    {
+        return view('auth.register');
     }
 
-    public function handleRegister(Request $request) {
-        $request->validate([
-            'username' => 'required|unique:users',
-            'password' => 'required|min:6|confirmed',
-        ]);
-
-        User::create([
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return redirect()->route('login')->with('success', 'Pendaftaran berhasil. Silakan login!');
+    public function handleRegister(Request $request)
+    {
+        // Logika registrasi sederhana (tambahkan validasi)
+        // Contoh: User::create([...]);
+        return redirect('/login')->with('success', 'Registrasi berhasil, silakan login.');
     }
 }
-
