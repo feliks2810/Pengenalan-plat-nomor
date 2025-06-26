@@ -16,7 +16,7 @@ Meningkatkan keselamatan lalu lintas dengan membantu instansi atau pihak keamana
 - **YOLOv8** – Untuk mendeteksi pengendara dan kondisi helm
 - **EasyOCR** – Untuk pembacaan teks plat nomor
 - **Python + Flask** – Untuk integrasi model AI (YOLO & OCR)
-- **SQLite/MySQL** – Sebagai basis data
+- **MySQL** – Sebagai basis data
 - **Tailwind CSS** – Untuk styling frontend
 - **OpenCV** – Untuk pemrosesan video dan gambar (di sisi Python)
 
